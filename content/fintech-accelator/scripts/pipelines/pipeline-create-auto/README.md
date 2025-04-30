@@ -1,7 +1,3 @@
-Aquí tienes el `README.md` modificado para reflejar claramente que la ejecución se realiza en **dos pasos separados**. También mejoré la redacción en algunos puntos para mayor claridad y coherencia:
-
----
-
 # Pipeline para Automatizar la Ejecución de Scripts SQL en PostgreSQL
 
 Este script de Python automatiza la ejecución de archivos SQL para crear bases de datos, esquemas y tablas en PostgreSQL. Es especialmente útil para configurar rápidamente el entorno de base de datos **fintech** para un sistema de tarjetas de crédito.
@@ -90,7 +86,3 @@ Este paso se conecta directamente a la base `fintech_cards` y ejecuta:
 - Si `01-create-database.sql` no existe, el script puede crear la base de datos y el esquema directamente desde código (modo alternativo).
 - Puedes omitir `countries.sql` si no deseas cargar datos en esta tabla.
 - Para mayor seguridad, usa variables de entorno para las credenciales.
-
----
-
-¿Quieres que te genere también una **versión en inglés** o un **README corto para producción**?
