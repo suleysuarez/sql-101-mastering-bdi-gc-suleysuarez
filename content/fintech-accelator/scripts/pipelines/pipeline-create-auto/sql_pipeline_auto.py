@@ -229,22 +229,18 @@ def main():
     logger.info(f"Using SQL directory: {sql_dir}")
     
     # Lista de archivos SQL a ejecutar en orden
-    sql_files = [
-        '01-create-database.sql',
-        '02-create-tables.sql',
-        'countries.sql'  # Opcional: añadido en caso de que exista
-    ]
+    creation_file = '01-create-database.sql'
+    tables_file = '02-create-tables.sql'
     
     if args.use_sql_for_db_creation:
-        # OPCIÓN 1: Usar los archivos SQL para crear la BD y el esquema
-        # Esto ejecutará primero el archivo 01-create-database.sql desde postgres
-        # y luego el archivo 02-create-tables.sql desde la nueva BD
-        
+        # PASO 1: Crear la base de datos, el usuario y esquema desde el script
+        # 01-create-database.sql
+         
         # Conectar al servidor PostgreSQL
         conn = connect_postgres(args.host, args.port, args.user, args.password,  autocommit=True)
         
         # Verificar si debemos ejecutar el archivo de creación de BD
-        db_creation_file = os.path.join(sql_dir, '01-create-database.sql')
+        db_creation_file = os.path.join(sql_dir, creation_file)
         if os.path.exists(db_creation_file):
             logger.info(f"Executing database creation script: {db_creation_file}")
             execute_sql_file(conn, db_creation_file)
@@ -255,32 +251,10 @@ def main():
         
         conn.close()
         logger.info("Database created!")
-        # Conectar a la base de datos creada
-        # conn = connect_postgres(args.host, args.port, args.user, args.password, args.db_name)
-        
-        # # Ahora ejecutamos los archivos restantes
-        # for sql_file in sql_files[1:]:  # Saltamos el primer archivo (creación BD)
-        #     file_path = os.path.join(sql_dir, sql_file)
-            
-        #     if not os.path.exists(file_path):
-        #         logger.warning(f"File not found: {file_path}")
-        #         continue
-            
-        #     logger.info(f"Executing {file_path}")
-        #     execute_sql_file(conn, file_path)
-        
-        # conn.close()
     
     else:
-        # OPCIÓN 2: Crear la BD y el esquema mediante código Python
-        # y luego ejecutar los archivos SQL
-        
-        # Conectar a PostgreSQL (servidor)
-        #conn = connect_postgres(args.host, args.port, args.user, args.password)
-        
-        # Crear base de datos
-        #create_database(conn, args.db_name)
-        #conn.close()
+        # PASO 2: Crear las tablas dentro del esquema fintech de la base de datos
+        # utiliza el script 02-create-tables.sql
         
         # Conectar a la base de datos creada
         conn = connect_postgres(args.host, args.port, args.user, args.password, args.db_name)
@@ -288,25 +262,18 @@ def main():
         # Crear esquema
         create_schema(conn, args.schema_name)
         
-        # Ejecutar archivos SQL (saltando el de creación de BD)
-        for i, sql_file in enumerate(sql_files):
-            file_path = os.path.join(sql_dir, sql_file)
-            
-            if not os.path.exists(file_path):
-                logger.warning(f"File not found: {file_path}")
-                continue
-            
-            # Saltamos el archivo de creación de BD ya que ya la creamos
-            if i == 0 and "create-database" in sql_file:
-                logger.info(f"Skipping {file_path} - Database already created via code")
-                continue
-            
-            logger.info(f"Executing {file_path}")
-            execute_sql_file(conn, file_path)
+        # Ejecutar archivo de creacion de tablas
+        db_tables_file = os.path.join(sql_dir, tables_file)
         
+        if not os.path.exists(db_tables_file):
+            logger.warning(f"File not found: {db_tables_file}")
+        
+        logger.info(f"Executing {db_tables_file}")
+        execute_sql_file(conn, db_tables_file)
+        
+        # Cerrar conexión  
         conn.close()
-    
-    logger.info("SQL Pipeline completed successfully")
+        logger.info("SQL Pipeline completed successfully")
 
 if __name__ == "__main__":
     main()
