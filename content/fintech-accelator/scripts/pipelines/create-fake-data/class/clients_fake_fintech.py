@@ -71,9 +71,8 @@ def generate_data_dummy(auto_prefix:str = None):
         lambda faker: faker.date_of_birth(minimum_age=18, maximum_age=75).strftime('%Y-%m-%d'),
         
         # email: Custom email using first and last name
-        
 
-        lambda faker: faker.email().split('@')[0] + '@' + random.choice(CUSTOM_DOMAINS),
+        lambda faker: faker.email().split('@')[0] + faker.last_name() + str(faker.random_number(digits=2)) + '@' + random.choice(CUSTOM_DOMAINS),
         
         # phone: Faker's phone_number method
         'phone_number',

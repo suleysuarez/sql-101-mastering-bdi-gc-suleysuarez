@@ -7,7 +7,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from fake_data_generic import FakeGenericTable
 from read_columns_from_file import read_column_data
 
-def generate_data_dummy(auto_prefix:str = None):
+def generate_data_dummy(auto_prefix:str = None, records:int = None):
     """
     Example of generating data for the CREDIT_CARDS table.
     
@@ -61,7 +61,7 @@ def generate_data_dummy(auto_prefix:str = None):
         'client_id': read_column_data(
             file_path = '../../../data/sql/FK-Values/FK-FINTECH-CLIENTS.txt',
             column_number = 1),  # Placeholder - will be populated with real client_ids
-        'franchise_id': [id for id in range(1, 21)]
+        'franchise_id': [id for id in range(1, (records + 1))]
     }
     
     # Create the table
@@ -91,7 +91,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     # Create table
-    dummy_table = generate_data_dummy(args.prefix)
+    dummy_table = generate_data_dummy(args.prefix, args.records)
     
     # Generate fake data
     records = dummy_table.generate_fake_data(

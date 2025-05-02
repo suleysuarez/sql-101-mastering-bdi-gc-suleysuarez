@@ -7,7 +7,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from fake_data_generic import FakeGenericTable
 from read_columns_from_file import read_column_data
 
-def generate_data_dummy(auto_prefix:str = None):
+def generate_data_dummy(auto_prefix:str = None, records:int = None):
     """
     Example of generating data for the TRANSACTIONS table.
     
@@ -93,8 +93,8 @@ def generate_data_dummy(auto_prefix:str = None):
         'currency': read_column_data(
             file_path = '../../../data/sql/FK-Values/FK-FINTECH-COUNTRIES.txt',
             column_number = 2),
-        'location_id': [id for id in range(1, 11)],
-        'method_id': [id for id in range(1, 11)],
+        'location_id': [id for id in range(1, (records + 1))],
+        'method_id': [id for id in range(1, (4 + 1))],
         
     }
     
@@ -125,7 +125,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     # Create table
-    dummy_table = generate_data_dummy(args.prefix)
+    dummy_table = generate_data_dummy(args.prefix, args.records)
     
     # Generate fake data
     records = dummy_table.generate_fake_data(
