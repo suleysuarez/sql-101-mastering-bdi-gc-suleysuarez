@@ -2,6 +2,7 @@
 import sys
 import os
 import random
+import uuid
 from datetime import timedelta
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from fake_data_generic import FakeGenericTable
@@ -39,10 +40,37 @@ def generate_data_dummy(auto_prefix:str = None, records:int = None):
         'Canceled',
     ]
    
+    # Define custom providers as class methods to maintain state
+    class CustomProviders:
+        def __init__(self):
+            self.used_card_ids = set()
+            
+        def unique_card_id_generator(self, faker):
+            """Generar un número de tarjeta único verificando que no exista ya en el conjunto"""
+            max_attempts = 100  # Limite de intentos para evitar bucles infinitos
+            
+            for _ in range(max_attempts):
+                # Genera un número de tarjeta
+                card_id = faker.credit_card_number()
+                
+                # Si no está en el conjunto de usados, agrégalo y devuélvelo
+                if card_id not in self.used_card_ids:
+                    self.used_card_ids.add(card_id)
+                    return card_id
+                    
+            # Si no podemos encontrar un ID único después de muchos intentos,
+            # generamos uno basado en UUID para garantizar unicidad
+            unique_id = f"CC-{str(uuid.uuid4())[:16]}"
+            self.used_card_ids.add(unique_id)
+            return unique_id
+    
+    # Crear instancia de providers personalizada
+    custom_providers = CustomProviders()
+
     # Define faker providers for each column
     faker_providers = [
-        # card_id
-        lambda faker: faker.credit_card_number(),
+        # card_id - usando nuestra función personalizada
+        lambda faker: custom_providers.unique_card_id_generator(faker),
         # client_id
         'random_value',
         # issue_date
@@ -50,18 +78,17 @@ def generate_data_dummy(auto_prefix:str = None, records:int = None):
         # expiration_date
         lambda faker: (faker.date_between(start_date='-5y', end_date='-1y') + timedelta(days=365 * random.randint(3, 5))).strftime('%Y-%m-%d'),
         # status
-         lambda faker: random.choice(STATUS),
+        lambda faker: random.choice(STATUS),
         # franchise_id
         'random_value'
     ]
     
     # Add foreign keys
     foreign_keys = {
-        
         'client_id': read_column_data(
             file_path = '../../../data/sql/FK-Values/FK-FINTECH-CLIENTS.txt',
             column_number = 1),  # Placeholder - will be populated with real client_ids
-        'franchise_id': [id for id in range(1, (records + 1))]
+        'franchise_id': [id for id in range(1, (records + 1))]  # Protección para cuando records es None
     }
     
     # Create the table
@@ -81,7 +108,7 @@ def generate_data_dummy(auto_prefix:str = None, records:int = None):
 if __name__ == "__main__":
     import argparse
     
-    parser = argparse.ArgumentParser(description='Generate fake data for the CLIENTS table')
+    parser = argparse.ArgumentParser(description='Generate fake data for the CREDIT_CARDS table')
     parser.add_argument('--records', type=int, required=True, help='Number of records to generate')
     parser.add_argument('--seed', type=int, default=42, help='Random seed for reproducibility')
     parser.add_argument('--variability', type=float, default=0.3, 

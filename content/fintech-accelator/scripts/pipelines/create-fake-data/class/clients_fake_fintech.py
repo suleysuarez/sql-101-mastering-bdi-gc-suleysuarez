@@ -72,7 +72,7 @@ def generate_data_dummy(auto_prefix:str = None):
         
         # email: Custom email using first and last name
 
-        lambda faker: faker.email().split('@')[0] + faker.last_name() + str(faker.random_number(digits=2)) + '@' + random.choice(CUSTOM_DOMAINS),
+        lambda faker: faker.email().split('@')[0] + faker.last_name() + faker.word() + str(faker.random_number(digits=5)) + '@' + random.choice(CUSTOM_DOMAINS),
         
         # phone: Faker's phone_number method
         'phone_number',

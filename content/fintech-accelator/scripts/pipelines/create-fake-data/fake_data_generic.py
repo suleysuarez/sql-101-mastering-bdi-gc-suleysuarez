@@ -244,34 +244,27 @@ class FakeGenericTable:
             return f"'{str(value).replace('\'', '\'\'')}'"
     
     def to_sql(self, records: List[Dict[str, Any]]) -> str:
-        """
-        Convert records to SQL INSERT statements.
-        
-        Args:
-            records: List of record dictionaries
-            
-        Returns:
-            String containing SQL INSERT statements
-        """
         if not records:
             return ""
-        
-        sql_statements = []
-        
-        # Get column names from the first record
+
         columns = list(records[0].keys())
         columns_str = ', '.join(columns)
-        
-        # Use the fully qualified table name with schema
         full_table_name = self.get_full_table_name()
         
-        for record in records:
-            values = [self._format_value_for_sql(record[column]) for column in columns]
-            values_str = ', '.join(values)
-            
-            sql = f"INSERT INTO {full_table_name} ({columns_str}) VALUES ({values_str});"
-            sql_statements.append(sql)
+        sql_statements = []
+        batch_size = 10_000  # PostgreSQL	10,000 - 50,000	Máx. ~1GB por query (work_mem)
         
+        for i in range(0, len(records), batch_size):
+            batch = records[i:i + batch_size]
+            values_batch = []
+            
+            for record in batch:
+                values = [self._format_value_for_sql(record[column]) for column in columns]
+                values_batch.append(f"({', '.join(values)})")
+            
+            sql = f"INSERT INTO {full_table_name} ({columns_str}) VALUES {', '.join(values_batch)};"
+            sql_statements.append(sql)
+    
         return '\n'.join(sql_statements)
     
     def export_to_sql_file(self, records: List[Dict[str, Any]]) -> None:
