@@ -106,7 +106,7 @@ python sql_insert_pipeline_auto.py --user <usuario> --password <contraseña> --d
 python sql_insert_pipeline_auto.py --user fc_admin --password "mypass" --db-name fintech_cards --sql-dir ../../../data/sql --delay 1.5
 ```
 
-![alt text](image-1.png)
+![alt text](image-2.png)
 
 ### Estructura de Archivos SQL
 

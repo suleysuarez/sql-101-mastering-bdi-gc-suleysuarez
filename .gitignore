@@ -63,3 +63,16 @@ Thumbs.db
 *.tmp
 *.bak
 *~
+
+# Archivos SQL GEnerados
+content/fintech-accelator/data/sql/04-FINTECH-CLIENTS.sql
+content/fintech-accelator/data/sql/05-FINTECH-ISSUERS.sql
+content/fintech-accelator/data/sql/06-FINTECH-FRANCHISES.sql
+content/fintech-accelator/data/sql/07-FINTECH-MERCHANT_LOCATIONS.sql
+content/fintech-accelator/data/sql/08-FINTECH-CREDIT_CARDS.sql
+content/fintech-accelator/data/sql/09-FINTECH-TRANSACTIONS.sql
+content/fintech-accelator/data/sql/Bulk-Load/
+content/fintech-accelator/data/sql/FK-Values/FK-FINTECH-CLIENTS.txt
+content/fintech-accelator/data/sql/FK-Values/FK-FINTECH-CREDIT_CARDS.txt
+content/fintech-accelator/data/sql/FK-Values/FK-FINTECH-ISSUERS.txt
+content/fintech-accelator/data/sql/SQL-Data/
