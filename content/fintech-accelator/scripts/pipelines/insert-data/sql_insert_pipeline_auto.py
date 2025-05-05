@@ -10,7 +10,7 @@ from psycopg2 import sql, errors
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from tqdm import tqdm
 
-# Configuración de logging mejorada
+# Improved logging configuration
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -24,18 +24,22 @@ class SQLPipeline:
     def __init__(self):
         self.args = self.parse_arguments()
         self.conn = None
-        self.sql_files = [
+        # Standard SQL files for regular scripts
+        self.standard_sql_files = [
             '01-FINTECH-REGIONS.sql',
             '02-FINTECH-COUNTRIES.sql',
             '03-FINTECH-PAYMENT-METHODS.sql',
-            '04-FINTECH-CLIENTS.sql',
-            '05-FINTECH-ISSUERS.sql',
-            '06-FINTECH-FRANCHISES.sql',
-            '07-FINTECH-MERCHANT_LOCATIONS.sql',
-            '08-FINTECH-CREDIT_CARDS.sql',
-            '09-FINTECH-TRANSACTIONS.sql'
         ]
-        self.delay_between_files = 1  # 1 segundo de delay entre archivos
+        # Bulk load SQL files (from Bulk-Load directory)
+        self.bulk_load_sql_files = [
+            '04-FINTECH-CLIENTS_bulk_batches.sql',
+            '05-FINTECH-ISSUERS_bulk_batches.sql',
+            '06-FINTECH-FRANCHISES_bulk_batches.sql',
+            '07-FINTECH-MERCHANT_LOCATIONS_bulk_batches.sql',
+            '08-FINTECH-CREDIT_CARDS_bulk_batches.sql',
+            '09-FINTECH-TRANSACTIONS_bulk_batches.sql'
+        ]
+        self.delay_between_files = 1  # 1 second delay between files
 
     def parse_arguments(self):
         """Parse command line arguments with improved validation"""
@@ -132,7 +136,7 @@ class SQLPipeline:
 
         try:
             with self.conn.cursor() as cur:
-                # Barra de progreso para statements dentro del archivo
+                # Progress bar for statements within the file
                 with tqdm(statements, desc=f"Processing {os.path.basename(file_path)}", leave=False) as pbar_statements:
                     for statement in pbar_statements:
                         try:
@@ -158,7 +162,7 @@ class SQLPipeline:
         # 1. Check explicitly provided directory
         if os.path.exists(self.args.sql_dir):
             sql_dir = os.path.abspath(self.args.sql_dir)
-            if any(os.path.exists(os.path.join(sql_dir, f)) for f in self.sql_files):
+            if any(os.path.exists(os.path.join(sql_dir, f)) for f in self.standard_sql_files):
                 return sql_dir
         
         # 2. Check standard locations
@@ -171,7 +175,7 @@ class SQLPipeline:
         for location in possible_locations:
             norm_path = os.path.normpath(location)
             if os.path.exists(norm_path):
-                if any(os.path.exists(os.path.join(norm_path, f)) for f in self.sql_files):
+                if any(os.path.exists(os.path.join(norm_path, f)) for f in self.standard_sql_files):
                     return norm_path
         
         return None
@@ -199,25 +203,39 @@ class SQLPipeline:
                 logger.error(f"Schema {self.args.schema_name} does not exist")
                 sys.exit(1)
                 
-            # 4. Execute files with progress bar
+            # 4. Create combined list of all files to process
+            all_files = []
+            
+            # Add standard SQL files first
+            for sql_file in self.standard_sql_files:
+                all_files.append((sql_file, os.path.join(sql_dir, sql_file)))
+            
+            # Add bulk load SQL files (in Bulk-Load directory)
+            bulk_load_dir = os.path.join(sql_dir, "Bulk-Load")
+            if os.path.exists(bulk_load_dir):
+                for sql_file in self.bulk_load_sql_files:
+                    all_files.append((sql_file, os.path.join(bulk_load_dir, sql_file)))
+            else:
+                logger.warning(f"Bulk-Load directory not found at {bulk_load_dir}")
+                
+            # 5. Execute files with progress bar
             success_count = 0
-            with tqdm(self.sql_files, desc="Processing SQL files") as pbar_files:
-                for sql_file in pbar_files:
-                    file_path = os.path.join(sql_dir, sql_file)
-                    pbar_files.set_postfix(file=sql_file[:15] + "...")
+            with tqdm(all_files, desc="Processing SQL files") as pbar_files:
+                for sql_file_name, file_path in pbar_files:
+                    pbar_files.set_postfix(file=sql_file_name[:15] + "...")
                     
                     if self.execute_sql_file(file_path):
                         success_count += 1
                     else:
-                        logger.error(f"Failed to execute {sql_file}")
+                        logger.error(f"Failed to execute {sql_file_name}")
                         break
                     
-                    # Delay entre archivos
-                    if sql_file != self.sql_files[-1]:  # No esperar después del último archivo
+                    # Delay between files
+                    if sql_file_name != all_files[-1][0]:  # No waiting after last file
                         time.sleep(self.args.delay)
                     
-            logger.info(f"Pipeline completed. {success_count}/{len(self.sql_files)} files processed successfully")
-            return success_count == len(self.sql_files)
+            logger.info(f"Pipeline completed. {success_count}/{len(all_files)} files processed successfully")
+            return success_count == len(all_files)
             
         finally:
             if self.conn:
@@ -237,7 +255,7 @@ class SQLPipeline:
             return False
 
 def get_project_root():
-    """Devuelve la ruta absoluta al directorio fintech-accelator"""
+    """Returns the absolute path to the fintech-accelerator directory"""
     current_dir = os.path.dirname(os.path.abspath(__file__))
     return os.path.dirname(os.path.dirname(os.path.dirname(current_dir)))
 
