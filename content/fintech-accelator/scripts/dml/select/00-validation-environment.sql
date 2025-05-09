@@ -27,3 +27,11 @@ WHERE pid = pg_backend_pid();
 SELECT conname, contype, conrelid::regclass AS table_name
 FROM pg_constraint
 WHERE conrelid::regclass::text = 'your_table_name';
+
+-- 8. Count list constraints like primary keys, unique, foreign key, etc
+SELECT contype AS type_constraint,
+       COUNT(*) AS total_constraints
+FROM pg_constraint
+WHERE conrelid::regclass::text = 'fintech.issuers'
+GROUP BY type_constraint
+ORDER BY type_constraint DESC;
