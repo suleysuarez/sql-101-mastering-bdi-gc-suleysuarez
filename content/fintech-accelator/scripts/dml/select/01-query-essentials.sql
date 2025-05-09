@@ -9,4 +9,4 @@
 -- Corner, Gallery, Warehouse and Market. Also, exclude all countries
 -- except Colombia.
 
--- 5. Count credit cards issued by this franquise '886287'
+-- 5. Count credit cards issued by this franquise '886287'alfa2024*
