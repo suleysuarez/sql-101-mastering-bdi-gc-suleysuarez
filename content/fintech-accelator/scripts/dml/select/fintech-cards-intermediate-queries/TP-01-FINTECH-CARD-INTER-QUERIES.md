@@ -20,17 +20,8 @@ psql -U fc_admin -d fintech_cards
 
 3. Ejecuta el script para preparar nuestro campo de batalla con datos de prueba.
 
-**Nota sobre el procedimiento almacenado:**
-Este script contiene un procedimiento especial que genera transacciones con tarjetas de crédito simuladas. Podemos pensar en él como nuestra "máquina de datos" que crea rápidamente miles de registros para que podamos practicar nuestras habilidades de consulta. Aprenderemos más sobre estos poderosos procedimientos más adelante en el curso.
 
 ## 💻 DESAFÍO PRINCIPAL: DOMINA LAS CONSULTAS ESENCIALES
-
-Crea los siguientes directorios para organizar tus consultas:
-```
-fintech-accelator/scripts/dml/select/basic-joins/
-fintech-accelator/scripts/dml/select/aggregation-functions/
-fintech-accelator/scripts/dml/select/group-by-clauses/
-```
 
 ### 🔄 NIVEL 1: MAESTRO DE LOS JOINS (basic-joins.sql)
 
