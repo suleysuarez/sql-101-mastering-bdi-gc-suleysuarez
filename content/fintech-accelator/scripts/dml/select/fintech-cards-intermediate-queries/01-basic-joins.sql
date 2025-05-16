@@ -1,11 +1,12 @@
 -- JOINS APPLICATION
 -- DATABASE: FINTECH_CARDS
--- LAST_UPDATED: 10/05/2025
+-- LAST_UPDATED: 16/05/2025
 
 /**
-INNER JOIN: Listar todas las transacciones con detalles del cliente, 
+1. Consulta de Relación de Entidades:
+Construya una vista integral de transacciones con detalles de cliente asociados, 
 incluyendo nombre del cliente, monto de la transacción, 
-nombre del comercio y método de pago utilizado.
+nombre del comercio y método de pago.
 **/
 
 -- JOIN (transactions -> merchant_locations -> credit_cards -> clients ->payment_methods)
@@ -28,25 +29,28 @@ FROM fintech.transactions AS tr
 LIMIT 10;
 
 /**
-LEFT JOIN: Listar todos los clientes y sus tarjetas de crédito, 
-incluyendo aquellos clientes que no tienen ninguna 
-tarjeta registrada en el sistema.
+2. Análisis de Relación Cliente-Tarjeta:
+Genere una lista completa de clientes y sus tarjetas de crédito asociadas,
+asegurando la inclusión de clientes sin tarjetas registradas.
 **/
 
 /**
-RIGHT JOIN: Listar todas las ubicaciones comerciales y las transacciones 
-realizadas en ellas, incluyendo aquellas ubicaciones donde 
-aún no se han registrado transacciones.
+3. Análisis de Transacciones Comerciales:
+Desarrolle una consulta para mostrar todas las ubicaciones comerciales 
+y sus transacciones asociadas, incluidas las ubicaciones sin actividad
+ de transacciones registrada.
 **/
 
 /**
-FULL JOIN: Listar todas las franquicias y los países donde operan, 
-incluyendo franquicias que no están asociadas a ningún país 
-específico y países que no tienen franquicias operando en ellos.
+4. Distribución Geográfica de Franquicias:
+Cree una consulta para analizar franquicias y sus países de operación, 
+incluidas franquicias sin asociaciones de país y países sin franquicias activas.
 **/
 
 /**
-SELF JOIN: Encontrar pares de transacciones realizadas por el mismo 
-cliente en la misma ubicación comercial en diferentes
+5. Detección de Patrones de Transacciones Recurrentes:
+Implemente una consulta self-join para identificar pares
+de transacciones del mismo cliente en la misma ubicación comercial 
+en diferentes fechas, revelando comportamientos de compra recurrentes.
 **/
 

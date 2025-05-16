@@ -1,11 +1,13 @@
--- JOINS APPLICATION
+-- AGGREGATION FUNCTIONS APPLICATIONS
 -- DATABASE: FINTECH_CARDS
--- LAST_UPDATED: 10/05/2025
+-- LAST_UPDATED: 16/05/2025
 
 
 /**
-SUM: Calcular el monto total de transacciones realizadas por cada cliente 
-en los últimos 3 meses, mostrando el nombre del cliente y el total gastado.
+1. Análisis de Gastos del Cliente:
+Calcule los montos totales de transacciones 
+por cliente dentro del período de tres meses más reciente, 
+mostrando identificación del cliente y gasto total.
 **/
 -- FK: (transactions -> credit_cards -> clients)
 SELECT
@@ -25,29 +27,25 @@ GROUP BY cl.client_id, cl.first_name, cl.last_name
 ORDER BY cl.client_id DESC
 LIMIT 5;
 
--- check specific transactions
-SELECT tr.amount, tr.transaction_date, cc.card_id, cc.client_id
-FROM fintech.TRANSACTIONS as tr
-INNER JOIN fintech.credit_cards AS cc
-ON tr.card_id = cc.card_id
-WHERE cc.client_id = '  INS-AUTO17924456385';
-
 
 
 /**
-AVG: Obtener el valor promedio de las transacciones agrupadas por categoría
-de comercio y método de pago, para identificar los patrones de gasto según 
-el tipo de establecimiento.
+2. Distribución de Valor de Transacción:
+Determine los valores promedio de transacciones agrupados 
+por categoría de comercio y método de pago para identificar 
+patrones de gasto en diferentes tipos de establecimientos.
 **/
 
 /**
-COUNT: Contar el número de tarjetas de crédito emitidas por cada entidad 
-bancaria (issuer), agrupadas por franquicia, mostrando qué bancos 
-tienen mayor presencia por tipo de tarjeta.
+3. Distribución de Emisión de Tarjetas:
+Cuantifique las tarjetas de crédito emitidas por cada institución financiera,
+categorizadas por franquicia, para determinar la penetración de 
+mercado por tipo de tarjeta.
 **/
 
 /**
-MIN y MAX: Mostrar el monto de transacción más bajo y más alto para cada 
-cliente, junto con la fecha en que ocurrieron, para identificar patrones 
-de gasto extremos.
+4. Análisis de Límites de Gasto:
+Identifique los montos de transacción mínimos 
+y máximos para cada cliente junto con las fechas correspondientes 
+para establecer patrones de rango de gasto.
 **/

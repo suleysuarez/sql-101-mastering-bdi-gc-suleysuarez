@@ -1,19 +1,20 @@
--- JOINS APPLICATION
+-- GROUP BY AND HAVING APPLICATION
 -- DATABASE: FINTECH_CARDS
--- LAST_UPDATED: 10/05/202
+-- LAST_UPDATED: 16/05/202
 
 /**
-1. Obtener el total de gastos por cliente en los últimos 6 meses, 
-mostrando solo aquellos que han gastado más de $5,000, 
-incluyendo su nombre completo y cantidad de transacciones realizadas.
+1. Identificación de Clientes de Alto Valor:
+Calcule los totales de gastos de seis meses por cliente,
+filtrando aquellos que superan los $7,750,424,420,346.32 (~7.75 billones),
+incluyendo identificación completa del cliente y frecuencia de transacciones.
 */
 
 
 /**
-2. Listar las categorías de comercios con el promedio de transacciones
-por país, mostrando solo aquellas categorías donde el 
-promedio de transacción supere los $100 y se hayan 
-realizado al menos 50 operaciones.
+2. Análisis de Rendimiento de Categoría Comercial:
+Analice categorías comerciales por valor promedio de transacción
+por país, filtrando categorías con transacciones promedio superiores a 
+$5,497,488,250,176.02 (~5.50 billones) y mínimo 50 operaciones.
 **/
 
 SELECT
@@ -29,29 +30,29 @@ INNER JOIN fintech.countries AS co
 	ON ml.country_code = co.country_code
 --WHERE ml.country_code = 'CO' optional filter by colombia
 GROUP BY ml.category, co.name
-HAVING AVG(tr.amount) > 100
+HAVING AVG(tr.amount) > 5497488250176.02
 	AND COUNT(tr.transaction_id) >= 50
 ORDER BY total_operations_made DESC;
 
 
 /**
-3. Identificar las franquicias de tarjetas con mayor tasa de rechazo 
-de transacciones por país, mostrando el nombre de la franquicia, 
-país y porcentaje de rechazos, limitando a aquellas 
-con más de 5% de rechazos y al menos 100 intentos de transacción.
+3. Análisis de Rechazo de Transacciones:
+Determine franquicias de tarjetas con tasas elevadas de rechazo de transacciones
+por país, mostrando franquicia, país y porcentaje de rechazo, 
+filtrado para tasas superiores al 5% con mínimo 100 intentos de transacción.
 **/
 
 /**
-4. Mostrar los métodos de pago más utilizados por cada ciudad, 
-incluyendo el nombre del método, ciudad, país y cantidad de 
-transacciones, filtrando solo aquellas
-combinaciones que representen más del 20% .
-del total de transacciones de esa ciudad.
+4. Distribución Geográfica del Método de Pago:
+Analice los métodos de pago dominantes por ciudad, 
+incluyendo nombre del método, ciudad, país y volumen de transacciones,
+filtrado para métodos que representan más del 20% del volumen 
+de transacciones de una ciudad.
 **/
 
 /**
-Analizar el comportamiento de compra por género y rango de edad, 
-mostrando el total gastado, promedio por transacción y número de operaciones 
-completadas, incluyendo solo los grupos demográficos 
-que tengan al menos 30 clientes activos.
+5. Análisis de Patrones de Gasto Demográfico:
+Evalúe el comportamiento de compra en demografías de género y edad,
+calculando gasto total, valor promedio de transacción y frecuencia de
+operación, filtrado para grupos demográficos con mínimo 30 clientes activos.
 **/
