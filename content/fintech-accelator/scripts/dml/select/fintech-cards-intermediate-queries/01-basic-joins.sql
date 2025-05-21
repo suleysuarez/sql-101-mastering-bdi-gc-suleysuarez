@@ -34,6 +34,7 @@ Genere una lista completa de clientes y sus tarjetas de crédito asociadas,
 asegurando la inclusión de clientes sin tarjetas registradas.
 **/
 
+
 /**
 3. Análisis de Transacciones Comerciales:
 Desarrolle una consulta para mostrar todas las ubicaciones comerciales 

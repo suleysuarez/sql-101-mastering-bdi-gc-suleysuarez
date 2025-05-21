@@ -8,7 +8,33 @@ Calcule los totales de gastos de seis meses por cliente,
 filtrando aquellos que superan los $7,750,424,420,346.32 (~7.75 billones),
 incluyendo identificación completa del cliente y frecuencia de transacciones.
 */
-
+SELECT 
+   c.client_id,
+   c.first_name || ' ' || COALESCE(c.middle_name || ' ', '') || c.last_name AS client_name,
+   c.email,
+   c.phone,
+   COUNT(t.transaction_id) AS transaction_count,
+   SUM(t.amount) AS total_spent
+FROM 
+   fintech.CLIENTS c
+JOIN 
+   fintech.CREDIT_CARDS cc ON c.client_id = cc.client_id
+JOIN 
+   fintech.TRANSACTIONS t ON cc.card_id = t.card_id
+WHERE 
+   t.transaction_date >= (CURRENT_DATE - INTERVAL '6 months')
+   AND t.status = 'Completed'
+GROUP BY 
+   c.client_id, 
+   c.first_name, 
+   c.middle_name, 
+   c.last_name, 
+   c.email, 
+   c.phone
+HAVING 
+   SUM(t.amount) > 7750424420346.32
+ORDER BY 
+   total_spent DESC;
 
 /**
 2. Análisis de Rendimiento de Categoría Comercial:
