@@ -231,6 +231,7 @@ def main():
     # Lista de archivos SQL a ejecutar en orden
     creation_file = '01-create-database.sql'
     tables_file = '02-create-tables.sql'
+    alter_file = '03-alter-tables.sql'
     
     if args.use_sql_for_db_creation:
         # PASO 1: Crear la base de datos, el usuario y esquema desde el script
@@ -263,7 +264,7 @@ def main():
         create_schema(conn, args.schema_name)
         
         # Ejecutar archivo de creacion de tablas
-        db_tables_file = os.path.join(sql_dir, tables_file)
+        db_tables_file = os.path.join(sql_dir, alter_file)
         
         if not os.path.exists(db_tables_file):
             logger.warning(f"File not found: {db_tables_file}")

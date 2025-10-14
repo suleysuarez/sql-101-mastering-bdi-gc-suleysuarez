@@ -1,153 +1,199 @@
 -- ##################################################
 -- #            DDL SCRIPT DOCUMENTATION            #
 -- ##################################################
--- This script defines the database structure for a fintech credit card transaction system
--- Includes tables for CLIENTS, CREDIT_CARDS, FRANCHISES, ISSUERS, COUNTRIES, REGIONS, 
--- TRANSACTIONS, MERCHANT_LOCATIONS, and PAYMENT_METHODS, ensuring data integrity,
--- normalization, and performance.
--- The system is designed to track credit card transactions between merchants and customers,
--- with comprehensive reference data for financial institutions, geographical locations,
--- and payment processing details. The structure supports transaction monitoring, fraud detection,
--- and financial analytics with proper relationship constraints.
+-- This script defines the database structure for a music management system
+-- Includes tables for ARTISTAS, ALBUMES, CANCIONES, GENEROS, USUARIOS, PLAYLISTS,
+-- DISPOSITIVOS, and tracking tables for relationships and usage data.
+-- The system is designed to manage music libraries, playlists, and user listening patterns,
+-- supporting comprehensive music organization, playlist management, and listening analytics.
+-- All tables include appropriate constraints, relationships, and data types to ensure 
+-- data integrity and optimal performance.
 
 -- ##################################################
 -- #              TABLE DEFINITIONS                 #
 -- ##################################################
 
 -- Independent tables first
--- Table: fintech.REGIONS
--- Brief: Stores geographical regions for organizing countries
-CREATE TABLE IF NOT EXISTS fintech.REGIONS (
-    region_id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL
+-- Table: vibesia.ARTISTAS
+-- Brief: Stores information about music artists (soloists, bands, etc.)
+CREATE TABLE IF NOT EXISTS vibesia.ARTISTAS (
+    artista_id SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL UNIQUE,
+    pais_origen VARCHAR(50) NOT NULL,
+    anio_formacion INTEGER,
+    biografia TEXT,
+    tipo VARCHAR(20) NOT NULL CHECK (tipo IN ('solista', 'banda', 'colectivo', 'dúo', 'otro'))
 );
 
--- Table: fintech.COUNTRIES
--- Brief: Stores country information with currency and region association
-CREATE TABLE IF NOT EXISTS fintech.COUNTRIES (
-    country_code VARCHAR(3) PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    currency VARCHAR(3) NOT NULL,
-    region_id INT NULL
+-- Table: vibesia.GENEROS
+-- Brief: Catalog of music genres for categorization
+CREATE TABLE IF NOT EXISTS vibesia.GENEROS (
+    genero_id SERIAL PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL UNIQUE,
+    descripcion TEXT
 );
 
-
--- Table: fintech.PAYMENT_METHODS
--- Brief: Reference table for payment method types (e.g., chip, contactless, swipe)
-CREATE TABLE IF NOT EXISTS fintech.PAYMENT_METHODS (
-    method_id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL
+-- Table: vibesia.USUARIOS
+-- Brief: System users who manage music libraries and playlists
+CREATE TABLE IF NOT EXISTS vibesia.USUARIOS (
+    usuario_id SERIAL PRIMARY KEY,
+    nombre_usuario VARCHAR(50) NOT NULL UNIQUE,
+    correo_electronico VARCHAR(100) NOT NULL UNIQUE,
+    fecha_registro DATE NOT NULL DEFAULT CURRENT_DATE,
+    preferencias TEXT
 );
 
--- Table: fintech.CLIENTS
--- Brief: Stores customer information who own credit cards
-CREATE TABLE IF NOT EXISTS fintech.CLIENTS (
-    client_id VARCHAR(50) PRIMARY KEY,
-    first_name VARCHAR(100) NOT NULL,
-    middle_name VARCHAR(100),
-    last_name VARCHAR(100) NOT NULL,
-    gender VARCHAR(10),
-    birth_date DATE,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    phone VARCHAR(50),
-    address VARCHAR(255)
-);
-
--- Table: fintech.ISSUERS
--- Brief: Financial institutions that issue credit cards
-CREATE TABLE IF NOT EXISTS fintech.ISSUERS (
-    issuer_id VARCHAR(50) PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    bank_code VARCHAR(50) NOT NULL,
-    contact_phone VARCHAR(50),
-    international BOOLEAN DEFAULT FALSE,
-    country_code VARCHAR(3) NOT NULL
+-- Table: vibesia.DISPOSITIVOS
+-- Brief: Devices used to play music through the system
+CREATE TABLE IF NOT EXISTS vibesia.DISPOSITIVOS (
+    dispositivo_id SERIAL PRIMARY KEY,
+    tipo VARCHAR(50) NOT NULL,
+    sistema_operativo VARCHAR(50) NOT NULL
 );
 
 -- Dependent tables
--- Table: fintech.FRANCHISES
--- Brief: Credit card brands/networks (e.g., Visa, Mastercard)
-CREATE TABLE IF NOT EXISTS fintech.FRANCHISES (
-    franchise_id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    issuer_id VARCHAR(50) NOT NULL,
-    country_code VARCHAR(3) NOT NULL
+-- Table: vibesia.ALBUMES
+-- Brief: Music albums associated with artists
+CREATE TABLE IF NOT EXISTS vibesia.ALBUMES (
+    album_id SERIAL PRIMARY KEY,
+    artista_id INTEGER NOT NULL,
+    titulo VARCHAR(150) NOT NULL,
+    anio_lanzamiento INTEGER NOT NULL,
+    discografica VARCHAR(100),
+    tipo_album VARCHAR(20) NOT NULL CHECK (tipo_album IN ('estudio', 'directo', 'recopilatorio', 'remix', 'otro')),
+    portada VARCHAR(255)
 );
 
--- Table: fintech.MERCHANT_LOCATIONS
--- Brief: Physical or virtual locations where transactions occur
-CREATE TABLE IF NOT EXISTS fintech.MERCHANT_LOCATIONS (
-    location_id SERIAL PRIMARY KEY,
-    store_name VARCHAR(100) NOT NULL,
-    category VARCHAR(100) NOT NULL,
-    city VARCHAR(100) NOT NULL,
-    country_code VARCHAR(3) NOT NULL,
-    latitude DECIMAL(10,6),
-    longitude DECIMAL(10,6)
+-- Table: vibesia.CANCIONES
+-- Brief: Individual songs from albums
+CREATE TABLE IF NOT EXISTS vibesia.CANCIONES (
+    cancion_id SERIAL PRIMARY KEY,
+    album_id INTEGER NOT NULL,
+    titulo VARCHAR(150) NOT NULL,
+    duracion_segundos INTEGER NOT NULL CHECK (duracion_segundos > 0),
+    numero_pista INTEGER NOT NULL,
+    compositor VARCHAR(100),
+    letra TEXT,
+    ruta_archivo VARCHAR(255) NOT NULL
 );
 
--- Table: fintech.CREDIT_CARDS
--- Brief: Individual credit cards issued to clients
-CREATE TABLE IF NOT EXISTS fintech.CREDIT_CARDS (
-    card_id VARCHAR(50) PRIMARY KEY,
-    client_id VARCHAR(50) NOT NULL,
-    issue_date DATE NOT NULL,
-    expiration_date DATE NOT NULL,
-    status VARCHAR(20) NOT NULL,
-    franchise_id INT NOT NULL
+-- Table: vibesia.PLAYLISTS
+-- Brief: User-created collections of songs
+CREATE TABLE IF NOT EXISTS vibesia.PLAYLISTS (
+    playlist_id SERIAL PRIMARY KEY,
+    usuario_id INTEGER NOT NULL,
+    nombre VARCHAR(100) NOT NULL,
+    fecha_creacion DATE NOT NULL DEFAULT CURRENT_DATE,
+    descripcion TEXT,
+    es_publica BOOLEAN NOT NULL DEFAULT FALSE
 );
 
--- Transactional tables
--- Table: fintech.TRANSACTIONS
--- Brief: Records of financial transactions made with credit cards
-CREATE TABLE IF NOT EXISTS fintech.TRANSACTIONS (
-    transaction_id VARCHAR(50) PRIMARY KEY,
-    card_id VARCHAR(50) NOT NULL,
-    amount DECIMAL(15,2) NOT NULL,
-    currency VARCHAR(3) NOT NULL,
-    transaction_date TIMESTAMP NOT NULL,
-    channel VARCHAR(50) NOT NULL,
-    status VARCHAR(20) NOT NULL,
-    device_type VARCHAR(50),
-    location_id INT NOT NULL,
-    method_id INT NOT NULL
+-- Relationship tables
+-- Table: vibesia.CANCION_GENERO
+-- Brief: Many-to-many relationship between songs and genres
+CREATE TABLE IF NOT EXISTS vibesia.CANCION_GENERO (
+    cancion_id INTEGER NOT NULL,
+    genero_id INTEGER NOT NULL,
+    PRIMARY KEY (cancion_id, genero_id)
+);
+
+-- Table: vibesia.PLAYLIST_CANCION
+-- Brief: Songs included in playlists with ordering information
+CREATE TABLE IF NOT EXISTS vibesia.PLAYLIST_CANCION (
+    playlist_id INTEGER NOT NULL,
+    cancion_id INTEGER NOT NULL,
+    orden INTEGER NOT NULL,
+    PRIMARY KEY (playlist_id, cancion_id)
+);
+
+-- Table: vibesia.USUARIO_DISPOSITIVO
+-- Brief: Devices associated with users and their usage history
+CREATE TABLE IF NOT EXISTS vibesia.USUARIO_DISPOSITIVO (
+    usuario_id INTEGER NOT NULL,
+    dispositivo_id INTEGER NOT NULL,
+    fecha_registro DATE NOT NULL DEFAULT CURRENT_DATE,
+    ultimo_acceso TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (usuario_id, dispositivo_id)
+);
+
+-- Table: vibesia.REPRODUCCIONES
+-- Brief: Track of song playbacks by users on specific devices
+CREATE TABLE IF NOT EXISTS vibesia.REPRODUCCIONES (
+    reproduccion_id SERIAL PRIMARY KEY,
+    usuario_id INTEGER NOT NULL,
+    cancion_id INTEGER NOT NULL,
+    dispositivo_id INTEGER NOT NULL,
+    fecha_hora TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    completada BOOLEAN NOT NULL DEFAULT TRUE,
+    calificacion INTEGER CHECK (calificacion BETWEEN 1 AND 5)
 );
 
 -- ##################################################
 -- #            RELATIONSHIP DEFINITIONS            #
 -- ##################################################
 
--- Relationships for COUNTRIES
-ALTER TABLE fintech.COUNTRIES ADD CONSTRAINT fk_countries_regions 
-    FOREIGN KEY (region_id) REFERENCES fintech.REGIONS (region_id);
+-- Relationships for ALBUMES
+ALTER TABLE vibesia.ALBUMES ADD CONSTRAINT fk_albumes_artistas 
+    FOREIGN KEY (artista_id) REFERENCES vibesia.ARTISTAS (artista_id)
+    ON UPDATE CASCADE ON DELETE RESTRICT;
 
--- Relationships for ISSUERS
-ALTER TABLE fintech.ISSUERS ADD CONSTRAINT fk_issuers_countries 
-    FOREIGN KEY (country_code) REFERENCES fintech.COUNTRIES (country_code);
+-- Relationships for CANCIONES
+ALTER TABLE vibesia.CANCIONES ADD CONSTRAINT fk_canciones_albumes 
+    FOREIGN KEY (album_id) REFERENCES vibesia.ALBUMES (album_id)
+    ON UPDATE CASCADE ON DELETE RESTRICT;
 
--- Relationships for FRANCHISES
-ALTER TABLE fintech.FRANCHISES ADD CONSTRAINT fk_franchises_issuers 
-    FOREIGN KEY (issuer_id) REFERENCES fintech.ISSUERS (issuer_id);
-ALTER TABLE fintech.FRANCHISES ADD CONSTRAINT fk_franchises_countries 
-    FOREIGN KEY (country_code) REFERENCES fintech.COUNTRIES (country_code);
+-- Relationships for PLAYLISTS
+ALTER TABLE vibesia.PLAYLISTS ADD CONSTRAINT fk_playlists_usuarios 
+    FOREIGN KEY (usuario_id) REFERENCES vibesia.USUARIOS (usuario_id)
+    ON UPDATE CASCADE ON DELETE CASCADE;
 
--- Relationships for MERCHANT_LOCATIONS
-ALTER TABLE fintech.MERCHANT_LOCATIONS ADD CONSTRAINT fk_locations_countries 
-    FOREIGN KEY (country_code) REFERENCES fintech.COUNTRIES (country_code);
+-- Relationships for CANCION_GENERO
+ALTER TABLE vibesia.CANCION_GENERO ADD CONSTRAINT fk_cancion_genero_canciones 
+    FOREIGN KEY (cancion_id) REFERENCES vibesia.CANCIONES (cancion_id)
+    ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE vibesia.CANCION_GENERO ADD CONSTRAINT fk_cancion_genero_generos 
+    FOREIGN KEY (genero_id) REFERENCES vibesia.GENEROS (genero_id)
+    ON UPDATE CASCADE ON DELETE RESTRICT;
 
--- Relationships for CREDIT_CARDS
-ALTER TABLE fintech.CREDIT_CARDS ADD CONSTRAINT fk_cards_clients 
-    FOREIGN KEY (client_id) REFERENCES fintech.CLIENTS (client_id);
-ALTER TABLE fintech.CREDIT_CARDS ADD CONSTRAINT fk_cards_franchises 
-    FOREIGN KEY (franchise_id) REFERENCES fintech.FRANCHISES (franchise_id);
+-- Relationships for PLAYLIST_CANCION
+ALTER TABLE vibesia.PLAYLIST_CANCION ADD CONSTRAINT fk_playlist_cancion_playlists 
+    FOREIGN KEY (playlist_id) REFERENCES vibesia.PLAYLISTS (playlist_id)
+    ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE vibesia.PLAYLIST_CANCION ADD CONSTRAINT fk_playlist_cancion_canciones 
+    FOREIGN KEY (cancion_id) REFERENCES vibesia.CANCIONES (cancion_id)
+    ON UPDATE CASCADE ON DELETE CASCADE;
 
--- Relationships for TRANSACTIONS
-ALTER TABLE fintech.TRANSACTIONS ADD CONSTRAINT fk_transactions_cards 
-    FOREIGN KEY (card_id) REFERENCES fintech.CREDIT_CARDS (card_id);
-ALTER TABLE fintech.TRANSACTIONS ADD CONSTRAINT fk_transactions_locations 
-    FOREIGN KEY (location_id) REFERENCES fintech.MERCHANT_LOCATIONS (location_id);
-ALTER TABLE fintech.TRANSACTIONS ADD CONSTRAINT fk_transactions_methods 
-    FOREIGN KEY (method_id) REFERENCES fintech.PAYMENT_METHODS (method_id);
+-- Relationships for USUARIO_DISPOSITIVO
+ALTER TABLE vibesia.USUARIO_DISPOSITIVO ADD CONSTRAINT fk_usuario_dispositivo_usuarios 
+    FOREIGN KEY (usuario_id) REFERENCES vibesia.USUARIOS (usuario_id)
+    ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE vibesia.USUARIO_DISPOSITIVO ADD CONSTRAINT fk_usuario_dispositivo_dispositivos 
+    FOREIGN KEY (dispositivo_id) REFERENCES vibesia.DISPOSITIVOS (dispositivo_id)
+    ON UPDATE CASCADE ON DELETE CASCADE;
+
+-- Relationships for REPRODUCCIONES
+ALTER TABLE vibesia.REPRODUCCIONES ADD CONSTRAINT fk_reproducciones_usuarios 
+    FOREIGN KEY (usuario_id) REFERENCES vibesia.USUARIOS (usuario_id)
+    ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE vibesia.REPRODUCCIONES ADD CONSTRAINT fk_reproducciones_canciones 
+    FOREIGN KEY (cancion_id) REFERENCES vibesia.CANCIONES (cancion_id)
+    ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE vibesia.REPRODUCCIONES ADD CONSTRAINT fk_reproducciones_dispositivos 
+    FOREIGN KEY (dispositivo_id) REFERENCES vibesia.DISPOSITIVOS (dispositivo_id)
+    ON UPDATE CASCADE ON DELETE RESTRICT;
+
+-- ##################################################
+-- #             INDEX DEFINITIONS                  #
+-- ##################################################
+
+-- Indexes for optimizing frequently queried fields
+CREATE INDEX idx_canciones_titulo ON vibesia.CANCIONES (titulo);
+CREATE INDEX idx_artistas_nombre ON vibesia.ARTISTAS (nombre);
+CREATE INDEX idx_albumes_titulo ON vibesia.ALBUMES (titulo);
+CREATE INDEX idx_playlists_nombre ON vibesia.PLAYLISTS (nombre);
+CREATE INDEX idx_reproducciones_fecha ON vibesia.REPRODUCCIONES (fecha_hora);
+CREATE INDEX idx_reproducciones_usuario_cancion ON vibesia.REPRODUCCIONES (usuario_id, cancion_id);
+CREATE INDEX idx_generos_nombre ON vibesia.GENEROS (nombre);
 
 -- ##################################################
 -- #               END DOCUMENTATION                #
