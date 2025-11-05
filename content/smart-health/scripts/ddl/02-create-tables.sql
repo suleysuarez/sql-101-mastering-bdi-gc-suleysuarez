@@ -8,7 +8,22 @@
 -- prescriptions, and professional credentials in a normalized academic environment.
 -- All tables include appropriate constraints, relationships, and data types to ensure 
 -- data integrity and support comprehensive healthcare management operations.
+-- Database Normalization: 4NF (Fourth Normal Form)
+-- Target DBMS: PostgreSQL
 
+-- ##################################################
+-- #           SCHEMA CREATION (Optional)           #
+-- ##################################################
+
+-- RUN IN smarthdb - sm_admin
+-- 04. Create Schema
+CREATE SCHEMA IF NOT EXISTS smart_health AUTHORIZATION sm_admin;
+
+-- 05. Comment on database
+COMMENT ON DATABASE smarthdb IS 'Base de datos para el control de pacientes y citas';
+
+-- 06. Comment on schema
+COMMENT ON SCHEMA smart_health IS 'Esquema principal para el sistema de control de pacientes y citas';
 
 -- ##################################################
 -- #        MÓDULO GEOGRÁFICO - INDEPENDENT         #
@@ -16,7 +31,7 @@
 
 -- Table: departments
 -- Brief: Stores information about departments/states for geographic location
-CREATE TABLE IF NOT EXISTS smart_health.departments(
+CREATE TABLE IF NOT EXISTS smart_health.departments (
     department_code VARCHAR(10) PRIMARY KEY,
     department_name VARCHAR(100) NOT NULL
 );
@@ -27,11 +42,12 @@ COMMENT ON COLUMN smart_health.departments.department_name IS 'Nombre completo d
 
 -- Table: municipalities
 -- Brief: Stores municipalities/cities that belong to departments
-CREATE TABLE IF NOT EXISTS smart_health.municipalities(
+CREATE TABLE IF NOT EXISTS smart_health.municipalities (
     municipality_code VARCHAR(10) PRIMARY KEY,
     municipality_name VARCHAR(100) NOT NULL,
     department_code VARCHAR(10) NOT NULL
 );
+
 COMMENT ON TABLE smart_health.municipalities IS 'Catálogo de municipios o ciudades';
 COMMENT ON COLUMN smart_health.municipalities.municipality_code IS 'Código único del municipio';
 COMMENT ON COLUMN smart_health.municipalities.municipality_name IS 'Nombre completo del municipio';
@@ -136,7 +152,6 @@ CREATE TABLE IF NOT EXISTS smart_health.patients (
     registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     active BOOLEAN DEFAULT TRUE
 );
-
 
 COMMENT ON TABLE smart_health.patients IS 'Entidad principal de pacientes del hospital';
 COMMENT ON COLUMN smart_health.patients.patient_id IS 'Identificador único del paciente';
